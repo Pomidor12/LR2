@@ -1,40 +1,277 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <title>Привет Jenkins!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мемополис - Лучшие мемы дня</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #4e54c8, #8f94fb);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
         .container {
-            text-align: center;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+        }
+
         h1 {
             font-size: 3em;
-            margin-bottom: 0.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        p {
-            font-size: 1.4em;
-            margin-top: 0;
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .meme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding: 20px 0;
+        }
+
+        .meme-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .meme-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .meme-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-bottom: 3px solid #f0f0f0;
+        }
+
+        .meme-content {
+            padding: 20px;
+        }
+
+        .meme-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .meme-description {
+            color: #718096;
+            line-height: 1.5;
+        }
+
+        .meme-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+            padding: 50px;
+        }
+
+        .category-filter {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .filter-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .meme-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Привет от {{ student_name }}!</h1>
-        <p>Ура мы задеплоили приложуньку</p>
+        <header>
+            <h1>🎭 Мемополис</h1>
+            <p class="subtitle">Самые свежие и смешные мемы каждый день!</p>
+        </header>
+
+        <div class="category-filter">
+            <button class="filter-btn active" data-category="all">Все мемы</button>
+            <button class="filter-btn" data-category="cats">Котики</button>
+            <button class="filter-btn" data-category="programming">Программирование</button>
+            <button class="filter-btn" data-category="anime">Аниме</button>
+        </div>
+
+        <div class="meme-grid" id="memeGrid">
+            <div class="loading">Загружаем мемы...</div>
+        </div>
     </div>
+
+    <script>
+        // Мемы данных
+        const memes = [
+            {
+                id: 1,
+                title: "Когда находишь баг в продакшене",
+                image: "https://via.placeholder.com/400x250/667eea/white?text=🚨+Баг+в+продакшене",
+                description: "Лицо твоего тимлида, когда ты говоришь 'У меня всё работало на локалке'",
+                category: "programming",
+                likes: 1420,
+                shares: 89
+            },
+            {
+                id: 2,
+                title: "Кот-разработчик",
+                image: "https://via.placeholder.com/400x250/f6ad55/white?text=🐱+Кот+за+ноутбуком",
+                description: "Когда твой код компилируется с первого раза",
+                category: "cats",
+                likes: 2567,
+                shares: 156
+            },
+            {
+                id: 3,
+                title: "Аниме момент",
+                image: "https://via.placeholder.com/400x250/fc8181/white?text=🎌+Аниме+сцена",
+                description: "Когда понимаешь, что аниме сезон закончился на клиффхэнгере",
+                category: "anime",
+                likes: 1890,
+                shares: 203
+            },
+            {
+                id: 4,
+                title: "Коммит без теста",
+                image: "https://via.placeholder.com/400x250/68d391/white?text=💾+Коммит+в+main",
+                description: "Надеюсь, никто не заметит, что я закоммитил прямо в main",
+                category: "programming",
+                likes: 3120,
+                shares: 267
+            },
+            {
+                id: 5,
+                title: "Кот и пицца",
+                image: "https://via.placeholder.com/400x250/4fd1c7/white?text=🍕+Кот+и+пицца",
+                description: "Когда привозят пиццу, а ты уже 5 часов дебажишь одну строку кода",
+                category: "cats",
+                likes: 1789,
+                shares: 134
+            },
+            {
+                id: 6,
+                title: "Гик яой",
+                image: "https://via.placeholder.com/400x250/b794f4/white?text=🌈+Яой+мем",
+                description: "Когда случайно спойлеришь другу концовку аниме",
+                category: "anime",
+                likes: 2250,
+                shares: 178
+            }
+        ];
+
+        // Загрузка мемов
+        function loadMemes(category = 'all') {
+            const grid = document.getElementById('memeGrid');
+            const filteredMemes = category === 'all' ? memes : memes.filter(meme => meme.category === category);
+            
+            grid.innerHTML = '';
+            
+            filteredMemes.forEach(meme => {
+                const memeCard = document.createElement('div');
+                memeCard.className = 'meme-card';
+                memeCard.innerHTML = `
+                    <img src="${meme.image}" alt="${meme.title}" class="meme-image">
+                    <div class="meme-content">
+                        <div class="meme-title">${meme.title}</div>
+                        <div class="meme-description">${meme.description}</div>
+                        <div class="meme-stats">
+                            <div class="stat">❤️ ${meme.likes}</div>
+                            <div class="stat">↗️ ${meme.shares}</div>
+                            <div class="stat">#${meme.category}</div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(memeCard);
+            });
+        }
+
+        // Фильтрация по категориям
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                loadMemes(btn.dataset.category);
+            });
+        });
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMemes();
+            
+            // Анимация появления карточек
+            setTimeout(() => {
+                document.querySelectorAll('.meme-card').forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        card.style.transition = 'all 0.5s ease';
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, 50);
+                    }, index * 100);
+                });
+            }, 100);
+        });
+    </script>
 </body>
 </html>
